@@ -16,27 +16,33 @@ const SignUpForm = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { displayName, email, password, confirmPassword } = formFields;
 
+  const resetFormFields = () => {
+    setFormFields(defaultFormFields);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    console.log(event);
-    console.log(displayName, email, password);
+    if (password !== confirmPassword) {
+      alert("passwords do not match");
+      return;
+    }
 
-    // 1. Confirm that the password matches
-    if (password === confirmPassword) {
-      // 2. We need to see if we've autheticated that user with email/password
+    try {
       const { user } = await createAuthUserWithEmailAndPassword(
         email,
         password
       );
 
-      // 3.Create a user document from what createAuthUserWithEmailAndPassword returns
-      const userDocRef = await createUserDocumentFromAuth({
-        ...user,
-        displayName: displayName,
-      });
-    } else {
-      console.log("Passwords do not match");
+      await createUserDocumentFromAuth(user, { displayName });
+
+      resetFormFields();
+    } catch (error) {
+      if (error.code === "auth/email-already-in-use") {
+        alert("Cannot create user, email already in use");
+      } else {
+        console.log("user creating encountered an error", error);
+      }
     }
   };
 
