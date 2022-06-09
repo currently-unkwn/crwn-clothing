@@ -1,14 +1,14 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
   signInWithRedirect,
   signInWithPopup,
   GoogleAuthProvider,
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
+
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDXIUkiE7GzVoLPolOyXzseEFGHYyOjoOo",
   authDomain: "crwn-clothing-db-b4753.firebaseapp.com",
@@ -20,8 +20,8 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
-const googleProvider = new GoogleAuthProvider();
 
+const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: "select_account",
 });
@@ -35,13 +35,12 @@ export const signInWithGoogleRedirect = () =>
 export const db = getFirestore();
 
 export const createUserDocumentFromAuth = async (userAuth) => {
+  // guard clause
+  if (!userAuth) return;
+
   const userDocRef = doc(db, "users", userAuth.uid);
 
-  console.log(userDocRef);
-
   const userSnapshot = await getDoc(userDocRef);
-  console.log(userSnapshot);
-  console.log(userSnapshot.exists());
 
   if (!userSnapshot.exists()) {
     const { displayName, email } = userAuth;
@@ -60,4 +59,11 @@ export const createUserDocumentFromAuth = async (userAuth) => {
   }
 
   return userDocRef;
+};
+
+export const createAuthUserWithEmailAndPassword = async (email, password) => {
+  // guard clause
+  if (!email || !password) return;
+
+  return await createUserWithEmailAndPassword(auth, email, password);
 };
