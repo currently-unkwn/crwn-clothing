@@ -8,9 +8,19 @@ export const CartContext = createContext({
 });
 
 const addCartItem = (cartItems, productToAdd) => {
-  // 1. find if cartItems contains productToAdd
-  // 2. if found, increment quantity
-  // 3. return new array with modified cartItems/ new cart item
+  const existingCartItem = cartItems.find(
+    (cartItem) => cartItem.id === productToAdd.id
+  );
+
+  if (existingCartItem) {
+    return cartItems.map((cartItem) =>
+      cartItem.id === productToAdd.id
+        ? { ...cartItem, quantity: cartItem.quantity + 1 }
+        : cartItem
+    );
+  }
+
+  return [...cartItems, { ...productToAdd, quantity: 1 }];
 };
 
 export const CartProvider = ({ children }) => {
@@ -21,6 +31,6 @@ export const CartProvider = ({ children }) => {
     setCartItems(addCartItem(cartItems, productToAdd));
   };
 
-  const value = { isCartOpen, setIsCartOpen };
+  const value = { isCartOpen, setIsCartOpen, cartItems, addItemToCart };
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
